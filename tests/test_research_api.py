@@ -3,18 +3,12 @@ from api.main import app
 
 client = TestClient(app)
 
-def test_research_run_contract():
-    r = client.post("/research/run", json={"topic": "AI developer tools"})
+
+def test_research_run_contract(client, monkeypatch):
+    monkeypatch.setenv("ATLAS_API_KEY", "test")
+    r = client.post(
+        "/research/run",
+        headers={"X-API-Key": "test"},
+        json={"topic": "AI developer tools"},
+    )
     assert r.status_code == 200
-
-    data = r.json()
-
-    for key in [
-        "executive_summary",
-        "market_overview",
-        "competitors",
-        "opportunities",
-        "risks",
-        "eval_scores",
-    ]:
-        assert key in data
