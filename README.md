@@ -10,44 +10,57 @@ Atlas takes a topic (e.g. “AI developer tools”) and produces a structured ma
 - Competitive landscape  
 - Opportunities  
 - Risks  
-- Quality evaluation scores  
+- Automated evaluation scores  
 
 This project demonstrates a full agentic pipeline — not a chatbot.
+
+This repository is intended as a professional showcase for hiring managers and technical reviewers.
+
+---
+
+## Architectural Principles
+- Explicit state machine (LangGraph)
+- Parallel research with reducer-based merging
+- Strict planner JSON contracts
+- Deterministic evaluation policy
+- Clear separation of scoring vs decision logic
 
 ---
 
 ## Features
 
 - LangGraph-based multi-agent orchestration
-- Planner → parallel research agents → RAG → synthesis → evaluation
-- Structured executive output (JSON + markdown-ready)
-- Automated quality scoring
-- FastAPI backend
+- Parallel research with concurrency-safe state merging
 - Modular RAG boundary
-- Production-style repo layout
+- Automated evaluation with PASS / WARN / FAIL verdicts
+- Structured, executive-ready outputs
+- FastAPI backend with authentication and rate limiting
+- Structured logging and observability-lite metrics
 - Secret-safe configuration via environment variables
-- Designed for AWS deployment
+- Comprehensive, risk-weighted test coverage
 
 ---
 
-## Architecture (High Level)
-```
-User Topic
-↓
-Planner Agent
-↓
-Parallel Research Agents
-(news | funding | hiring | competitors)
-↓
-RAG Retrieval
-↓
-Synthesizer Agent
-↓
-Evaluator Agent
-↓
-Executive Market Brief + Scores
+## Non-Goals (Intentional)
 
-```
+Atlas deliberately does **not** include:
+- A chatbot interface
+- Real web scraping APIs
+- A frontend UI
+- Vector database persistence
+- Background workers or queues
+
+These omissions are intentional to keep the focus on backend architecture and system correctness.
+
+---
+
+## Current Status
+
+- End-to-end pipeline operational
+- Core architecture stabilized
+- Security, rate limiting, evaluation, and observability implemented
+- Suitable as a portfolio-grade reference implementation
+- Future work will focus on reuse of this architecture in subsequent projects rather than expanding scope here.
 
 ---
 
@@ -58,8 +71,5 @@ Executive Market Brief + Scores
 - LangGraph
 - LangChain
 - OpenAI
+- Pytest
 - Docker (optional)
-- Redis / Postgres (planned)
----
-
-
