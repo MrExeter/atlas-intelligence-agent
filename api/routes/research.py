@@ -43,7 +43,7 @@ async def run_research(req: ResearchRequest):
     result = graph.invoke(initial_state)
 
     # Calculate and save latency
-    latency_ms = round((time.time() - start_time) * 1000, 2)
+    latency_ms = int((time.time() - start_time) * 1000)
     metrics = result.get("metrics", {})
     metrics["latency_ms"] = latency_ms
 
@@ -67,12 +67,28 @@ async def run_research(req: ResearchRequest):
         "competitors": result.get("competitors"),
         "opportunities": result.get("opportunities"),
         "risks": result.get("risks"),
-        "eval": {
-            "scores": raw_scores,
-            "normalized_scores": normalized_scores,
-            "verdict": verdict,
-        },
+
+        # ← flatten for frontend
+        "eval_scores": normalized_scores,
+        "verdict": verdict,
+        "latency": latency_ms,
+
+        # optional (nice for future)
         "metrics": metrics,
     }
+
+    # return {
+    #     "executive_summary": result.get("executive_summary"),
+    #     "market_overview": result.get("market_overview"),
+    #     "competitors": result.get("competitors"),
+    #     "opportunities": result.get("opportunities"),
+    #     "risks": result.get("risks"),
+    #     "eval": {
+    #         "scores": raw_scores,
+    #         "normalized_scores": normalized_scores,
+    #         "verdict": verdict,
+    #     },
+    #     "metrics": metrics,
+    # }
 
 
