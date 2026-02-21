@@ -4,8 +4,8 @@ import time
 from api.schemas.research import ResearchRequest, ResearchResponse
 from agents.graph import build_graph
 from datetime import datetime, timezone
-from api.middleware.auth import require_api_key
 from api.middleware.rate_limit import rate_limit
+from auth.token_validator import validate_token
 
 from evals.policy import derive_verdict, normalize_scores
 
@@ -21,11 +21,10 @@ graph = build_graph()
     "/run",
     response_model=ResearchResponse,
     dependencies=[
-        Depends(require_api_key),
         Depends(rate_limit),
     ],
 )
-async def run_research(req: ResearchRequest):
+async def run_research(req: ResearchRequest, _: None = Depends(validate_token)):
     start_time = time.time()
 
     initial_state = {
@@ -76,19 +75,5 @@ async def run_research(req: ResearchRequest):
         # optional (nice for future)
         "metrics": metrics,
     }
-
-    # return {
-    #     "executive_summary": result.get("executive_summary"),
-    #     "market_overview": result.get("market_overview"),
-    #     "competitors": result.get("competitors"),
-    #     "opportunities": result.get("opportunities"),
-    #     "risks": result.get("risks"),
-    #     "eval": {
-    #         "scores": raw_scores,
-    #         "normalized_scores": normalized_scores,
-    #         "verdict": verdict,
-    #     },
-    #     "metrics": metrics,
-    # }
 
 
