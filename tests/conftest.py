@@ -3,7 +3,6 @@ load_dotenv()
 
 import sys
 from pathlib import Path
-import os
 import pytest
 from fastapi.testclient import TestClient
 
@@ -12,7 +11,10 @@ sys.path.append(str(ROOT))
 
 
 @pytest.fixture
-def client(monkeypatch):
-    monkeypatch.setenv("ATLAS_API_KEY", "test")
-    from api.main import app  # import after env set
+def client():
+    from api.main import app
+
+    async def mock_validate_token(request):
+        return None
+
     return TestClient(app)

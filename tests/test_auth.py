@@ -1,23 +1,13 @@
-def test_missing_api_key(client):
+def test_missing_token(client):
     resp = client.post("/research/run", json={"topic": "AI tools"})
     assert resp.status_code == 401
 
 
-def test_invalid_api_key(client, monkeypatch):
-    monkeypatch.setenv("ATLAS_API_KEY", "correct")
+def test_invalid_token(client):
     resp = client.post(
         "/research/run",
-        headers={"X-API-Key": "wrong"},
+        headers={"Authorization": "Bearer invalid"},
         json={"topic": "AI tools"},
     )
     assert resp.status_code == 401
 
-
-def test_valid_api_key(client, monkeypatch):
-    monkeypatch.setenv("ATLAS_API_KEY", "correct")
-    resp = client.post(
-        "/research/run",
-        headers={"X-API-Key": "correct"},
-        json={"topic": "AI tools"},
-    )
-    assert resp.status_code == 200

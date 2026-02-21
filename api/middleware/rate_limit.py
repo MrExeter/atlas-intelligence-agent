@@ -5,17 +5,22 @@ from config import get_rate_limit_per_minute
 
 _requests: dict[str, list[float]] = defaultdict(list)
 
-
 def rate_limit(request: Request):
-    api_key = request.headers.get("X-API-Key")
-    if not api_key:
-        return  # auth handles this
+    # api_key = request.headers.get("X-API-Key")
+    # if not api_key:
+    #     return  # auth handles this
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return  # let auth layer handle 401
+
+    raw_token = auth_header.split(" ")[1]
 
     limit = get_rate_limit_per_minute()
     now = time.time()
     window_start = now - 60
 
-    timestamps = _requests[api_key]
+    timestamps = _requests[raw_token]
     timestamps[:] = [t for t in timestamps if t > window_start]
 
     if len(timestamps) >= limit:
