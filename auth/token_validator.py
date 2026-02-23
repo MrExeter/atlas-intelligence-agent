@@ -1,10 +1,13 @@
 import os
 import hashlib
 from datetime import datetime, timezone
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Security, status
 
 import boto3
 from fastapi import HTTPException, Request
 
+security = HTTPBearer()
 
 TOKEN_HASH_SALT = os.getenv("TOKEN_HASH_SALT")
 AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
@@ -23,25 +26,41 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(combined).hexdigest()
 
 
-async def validate_token(request: Request):
-    auth_header = request.headers.get("Authorization")
+async def validate_token(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    token = credentials.credentials
 
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
-    raw_token = auth_header.split(" ")[1]
-    token_hash = hash_token(raw_token)
+    token_hash = hash_token(token)
 
     response = table.get_item(Key={"token_hash": token_hash})
     item = response.get("Item")
 
-    if not item:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not item or not item.get("is_active", False):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
-    if not item.get("is_active", False):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    expires_raw = item.get("expires_at")
+    if not expires_raw:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
-    expires_at = datetime.fromisoformat(item["expires_at"])
+    expires_at = datetime.fromisoformat(expires_raw)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
 
     if datetime.now(timezone.utc) > expires_at:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )

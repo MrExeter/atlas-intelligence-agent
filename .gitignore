@@ -12,6 +12,9 @@
 # AWS User-specific
 .idea/**/aws.xml
 
+# docker
+docker-compose.override.yml
+
 # Generated files
 .idea/**/contentModel.xml
 

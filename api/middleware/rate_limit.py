@@ -6,9 +6,6 @@ from config import get_rate_limit_per_minute
 _requests: dict[str, list[float]] = defaultdict(list)
 
 def rate_limit(request: Request):
-    # api_key = request.headers.get("X-API-Key")
-    # if not api_key:
-    #     return  # auth handles this
     auth_header = request.headers.get("Authorization")
 
     if not auth_header or not auth_header.startswith("Bearer "):
