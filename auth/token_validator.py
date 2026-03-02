@@ -1,5 +1,6 @@
 import os
 import hashlib
+from typing import Optional
 from datetime import datetime, timezone
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Security, status
@@ -27,8 +28,19 @@ def hash_token(token: str) -> str:
 
 
 async def validate_token(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security)
 ):
+
+    if request.method == "OPTIONS":
+        return
+
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
     token = credentials.credentials
 
     if not token:
